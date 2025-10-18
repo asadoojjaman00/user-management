@@ -1,7 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import BaseUserManager ,AbstractUser,PermissionsMixin
-from django.dispatch import receiver
-from django.db.models.signals import pre_save
+from django.contrib.auth.models import BaseUserManager ,AbstractUser
+
 
 
 class UserManager(BaseUserManager):
@@ -37,6 +36,3 @@ class User(AbstractUser):
         return self.email
 
 
-@receiver(pre_save, sender=User)
-def set_full_name(sender, instance, **kwargs):
-    instance.full_name = f"{instance.first_name} {instance.last_name}".strip()
