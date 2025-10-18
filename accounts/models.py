@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager ,AbstractUser,PermissionsMixin
-# Create your models here.
+from django.dispatch import receiver
+from django.db.models.signals import pre_save
 
 
 class UserManager(BaseUserManager):
@@ -18,3 +19,24 @@ class UserManager(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         return self._create_user(email,password, **extra_fields)
     
+class User(AbstractUser):
+    email = models.EmailField(unique=True,max_length=550,null=False,blank=False)
+    full_name = models.CharField(max_length=150, null=False,blank=False)
+
+    is_active = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['full_name']
+
+    objects = UserManager()
+
+    def __str__(self):
+        return self.email
+
+
+@receiver(pre_save, sender=User)
+def set_full_name(sender, instance, **kwargs):
+    instance.full_name = f"{instance.first_name} {instance.last_name}".strip()
